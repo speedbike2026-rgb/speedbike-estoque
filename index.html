@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speedbike - Sistema de Estoque</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fa-solid fa-bicycle"></i>
+                <h1>Speedbike</h1>
+            </div>
+            <p class="subtitle">Sistema de Gestão de Estoque</p>
+        </header>
+
+        <!-- Search Section -->
+        <section class="search-section">
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="searchInput" placeholder="Buscar itens por nome, categoria ou código...">
+            </div>
+        </section>
+
+        <!-- Action Buttons -->
+        <section class="actions">
+            <div class="action-group">
+                <button class="btn btn-primary" onclick="openModal()">
+                    <i class="fa-solid fa-plus"></i> Novo Item
+                </button>
+                <button class="btn btn-secondary" onclick="exportToJSON()" title="Exportar dados">
+                    <i class="fa-solid fa-download"></i> Exportar
+                </button>
+                <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()" title="Importar dados">
+                    <i class="fa-solid fa-upload"></i> Importar
+                </button>
+                <input type="file" id="importFile" accept=".json" style="display:none" onchange="importFromJSON(event)">
+            </div>
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-label">Total de Itens</span>
+                    <span class="stat-value" id="totalItems">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Estoque Total</span>
+                    <span class="stat-value" id="totalStock">0</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Inventory Table -->
+        <section class="inventory-section">
+            <table class="inventory-table">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Imagem</th>
+                        <th>Nome do Item</th>
+                        <th>Categoria</th>
+                        <th>Preço</th>
+                        <th>Quantidade</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="inventoryBody">
+                    <!-- Items will be populated here -->
+                </tbody>
+            </table>
+            <div class="empty-state" id="emptyState">
+                <i class="fa-solid fa-box-open"></i>
+                <h3>Nenhum item encontrado</h3>
+                <p>Adicione novos itens ao seu estoque!</p>
+            </div>
+        </section>
+    </div>
+
+    <!-- Modal for Adding/Editing Items -->
+    <div class="modal" id="itemModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Adicionar Novo Item</h2>
+                <button class="close-btn" onclick="closeModal()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form id="itemForm" onsubmit="saveItem(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="itemCode">Código</label>
+                        <input type="text" id="itemCode" required placeholder="Ex: BIK001">
+                    </div>
+                    <div class="form-group">
+                        <label for="itemName">Nome do Item</label>
+                        <input type="text" id="itemName" required placeholder="Ex: Roda 26 polegadas">
+                    </div>
+                    <div class="form-group">
+                        <label for="itemCategory">Categoria</label>
+                        <select id="itemCategory" required>
+                            <option value="">Selecione...</option>
+                            <option value="Rodas">Rodas</option>
+                            <option value="Pneus">Pneus</option>
+                            <option value="Freios">Freios</option>
+                            <option value="Cambios">Câmbios</option>
+                            <option value="Guidões">Guidões</option>
+                            <option value="Selins">Selins</option>
+                            <option value="Correntes">Correntes</option>
+                            <option value="Pedais">Pedais</option>
+                            <option value="Acessorios">Acessórios</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="itemPrice">Preço (R$)</label>
+                        <input type="number" id="itemPrice" required step="0.01" min="0" placeholder="0,00">
+                    </div>
+                    <div class="form-group">
+                        <label for="itemQuantity">Quantidade</label>
+                        <input type="number" id="itemQuantity" required min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="itemMinStock">Estoque Mínimo</label>
+                        <input type="number" id="itemMinStock" required min="0" value="5">
+                    </div>
+                </div>
+                <div class="form-group full-width">
+                    <label for="itemDescription">Descrição</label>
+                    <textarea id="itemDescription" rows="3" placeholder="Descrição adicional do item..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa-solid fa-check"></i> Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for Quantity Update -->
+    <div class="modal" id="quantityModal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2>Atualizar Quantidade</h2>
+                <button class="close-btn" onclick="closeQuantityModal()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form onsubmit="updateQuantity(event)">
+                <div class="quantity-display">
+                    <h3 id="quantityItemName">Nome do Item</h3>
+                    <p class="current-quantity">Quantidade atual: <span id="currentQuantity">0</span></p>
+                </div>
+                <div class="quantity-actions">
+                    <button type="button" class="qty-btn" onclick="adjustQuantity(-1)">
+                        <i class="fa-solid fa-minus"></i>
+                    </button>
+                    <input type="number" id="newQuantity" required min="0" value="0" class="qty-input">
+                    <button type="button" class="qty-btn" onclick="adjustQuantity(1)">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeQuantityModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa-solid fa-check"></i> Atualizar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="notificationMessage">Mensagem</span>
+    </div>
+
+    <!-- Scripts -->
+    <script src="firebase-config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
+
