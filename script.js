@@ -33,6 +33,7 @@ function renderInventory(searchTerm = '') {
                 <td><span class="item-category">${item.category}</span></td>
                 <td><span class="item-price">R$ ${item.price.toFixed(2).replace('.', ',')}</span></td>
                 <td><span class="qty-badge ${qtyClass}" onclick="editItem('${item.id}')" style="cursor:pointer" title="Clique para editar">${item.quantity}</span></td>
+                <td><span class="min-stock">${item.minStock}</span></td>
                 <td>
                     <div class="action-buttons">
                         <button class="action-btn edit" onclick="editItem('${item.id}')" title="Editar">

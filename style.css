@@ -228,3 +228,8 @@ form { padding: 25px; }
     .stats { justify-content: center; }
     .form-grid { grid-template-columns: 1fr; }
 }
+
+.min-stock {
+    font-weight: 600;
+    color: var(--warning-color);
+}
