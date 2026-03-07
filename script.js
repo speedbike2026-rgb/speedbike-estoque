@@ -44,13 +44,13 @@ function renderInventory(searchTerm = '') {
                 <td><span class="qty-badge ${qtyClass}">${item.quantity}</span></td>
                 <td>
                     <div class="action-buttons">
-                        <button class="action-btn update" onclick="event.stopPropagation(); openQuantityModal('${item.id}')" title="Editar Quantidade">
+                        <button class="action-btn update" onclick="openQuantity('${item.id}')" title="Editar Quantidade">
                             <i class="fa-solid fa-pen-to-square"></i>
                         </button>
-                        <button class="action-btn edit" onclick="event.stopPropagation(); editItem('${item.id}')" title="Editar">
+                        <button class="action-btn edit" onclick="editItem('${item.id}')" title="Editar">
                             <i class="fa-solid fa-pen"></i>
                         </button>
-                        <button class="action-btn delete" onclick="event.stopPropagation(); deleteItem('${item.id}')" title="Excluir">
+                        <button class="action-btn delete" onclick="deleteItem('${item.id}')" title="Excluir">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </div>
@@ -99,16 +99,7 @@ function editItem(id) {
     document.getElementById('itemModal').classList.add('active');
 }
 
-async function deleteItem(id) {
-    if (confirm('Excluir este item?')) {
-        await FirebaseAPI.delete(id);
-        inventory = inventory.filter(i => i.id !== id);
-        renderInventory(document.getElementById('searchInput').value);
-        showNotification('Item excluído!');
-    }
-}
-
-function openQuantityModal(id) {
+function openQuantity(id) {
     const item = inventory.find(i => i.id === id);
     if (!item) return;
     currentQuantityId = id;
@@ -116,6 +107,15 @@ function openQuantityModal(id) {
     document.getElementById('currentQuantity').textContent = item.quantity;
     document.getElementById('newQuantity').value = item.quantity;
     document.getElementById('quantityModal').classList.add('active');
+}
+
+async function deleteItem(id) {
+    if (confirm('Excluir este item?')) {
+        await FirebaseAPI.delete(id);
+        inventory = inventory.filter(i => i.id !== id);
+        renderInventory(document.getElementById('searchInput').value);
+        showNotification('Item excluído!');
+    }
 }
 
 function closeQuantityModal() { document.getElementById('quantityModal').classList.remove('active'); }
