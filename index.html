@@ -12,7 +12,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
         <header class="header">
             <div class="logo">
                 <i class="fa-solid fa-bicycle"></i>
@@ -21,7 +20,6 @@
             <p class="subtitle">Sistema de Gestão de Estoque</p>
         </header>
 
-        <!-- Search Section -->
         <section class="search-section">
             <div class="search-box">
                 <i class="fa-solid fa-magnifying-glass"></i>
@@ -29,19 +27,18 @@
             </div>
         </section>
 
-        <!-- Action Buttons -->
         <section class="actions">
-            <div class="action-group">
+            <div class="actions-left">
                 <button class="btn btn-primary" onclick="openModal()">
                     <i class="fa-solid fa-plus"></i> Novo Item
                 </button>
-                <button class="btn btn-secondary" onclick="exportToJSON()" title="Exportar dados">
+                <button class="btn btn-secondary" onclick="exportData()">
                     <i class="fa-solid fa-download"></i> Exportar
                 </button>
-                <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()" title="Importar dados">
+                <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">
                     <i class="fa-solid fa-upload"></i> Importar
                 </button>
-                <input type="file" id="importFile" accept=".json" style="display:none" onchange="importFromJSON(event)">
+                <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(this)">
             </div>
             <div class="stats">
                 <div class="stat-item">
@@ -52,16 +49,13 @@
                     <span class="stat-label">Estoque Total</span>
                     <span class="stat-value" id="totalStock">0</span>
                 </div>
-            </div>
         </section>
 
-        <!-- Inventory Table -->
         <section class="inventory-section">
             <table class="inventory-table">
                 <thead>
                     <tr>
                         <th>Código</th>
-                        <th>Imagem</th>
                         <th>Nome do Item</th>
                         <th>Categoria</th>
                         <th>Preço</th>
@@ -70,7 +64,6 @@
                     </tr>
                 </thead>
                 <tbody id="inventoryBody">
-                    <!-- Items will be populated here -->
                 </tbody>
             </table>
             <div class="empty-state" id="emptyState">
@@ -81,7 +74,6 @@
         </section>
     </div>
 
-    <!-- Modal for Adding/Editing Items -->
     <div class="modal" id="itemModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -128,10 +120,9 @@
                         <label for="itemMinStock">Estoque Mínimo</label>
                         <input type="number" id="itemMinStock" required min="0" value="5">
                     </div>
-                </div>
                 <div class="form-group full-width">
                     <label for="itemDescription">Descrição</label>
-                    <textarea id="itemDescription" rows="3" placeholder="Descrição adicional do item..."></textarea>
+                    <textarea id="itemDescription" rows="3" placeholder="Descrição adicional..."></textarea>
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
@@ -141,9 +132,7 @@
                 </div>
             </form>
         </div>
-    </div>
 
-    <!-- Modal for Quantity Update -->
     <div class="modal" id="quantityModal">
         <div class="modal-content modal-small">
             <div class="modal-header">
@@ -174,17 +163,13 @@
                 </div>
             </form>
         </div>
-    </div>
 
-    <!-- Notification -->
     <div class="notification" id="notification">
         <i class="fa-solid fa-circle-check"></i>
         <span id="notificationMessage">Mensagem</span>
     </div>
 
-    <!-- Scripts -->
     <script src="firebase-config.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
-
