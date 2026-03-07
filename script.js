@@ -36,7 +36,26 @@ function renderInventory(searchTerm = '') {
         emptyState.classList.remove('active');
         tbody.innerHTML = filteredItems.map(item => {
             const qtyClass = item.quantity === 0 ? 'out-of-stock' : item.quantity <= item.minStock ? 'low-stock' : 'in-stock';
-            return `<tr><td><span class="item-code">${item.code}</span></td><td><span class="item-name">${item.name}</span></td><td><span class="item-category">${item.category}</span></td><td><span class="item-price">R$ ${item.price.toFixed(2).replace('.', ',')}</span></td><td><div class="item-quantity"><span class="qty-badge ${qtyClass}">${item.quantity}</span><button class="action-btn update" onclick="openQuantityModal('${item.id}')"><i class="fa-solid fa-pen-to-square"></i></button></div></td><td><div class="action-buttons"><button class="action-btn edit" onclick="editItem('${item.id}')"><i class="fa-solid fa-pen"></i></button><button class="action-btn delete" onclick="deleteItem('${item.id}')"><i class="fa-solid fa-trash"></i></button></div></td></tr>`;
+            return `<tr>
+                <td><span class="item-code">${item.code}</span></td>
+                <td><span class="item-name">${item.name}</span></td>
+                <td><span class="item-category">${item.category}</span></td>
+                <td><span class="item-price">R$ ${item.price.toFixed(2).replace('.', ',')}</span></td>
+                <td><span class="qty-badge ${qtyClass}">${item.quantity}</span></td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="action-btn update" onclick="event.stopPropagation(); openQuantityModal('${item.id}')" title="Editar Quantidade">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button class="action-btn edit" onclick="event.stopPropagation(); editItem('${item.id}')" title="Editar">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button class="action-btn delete" onclick="event.stopPropagation(); deleteItem('${item.id}')" title="Excluir">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>`;
         }).join('');
     }
     updateStats();
@@ -120,7 +139,6 @@ function showNotification(message) {
     setTimeout(() => n.classList.remove('show'), 3000);
 }
 
-// Exportar dados
 function exportData() {
     const dataStr = JSON.stringify(inventory, null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
@@ -133,30 +151,23 @@ function exportData() {
     showNotification('Dados exportados!');
 }
 
-// Importar dados
 async function importData(input) {
     const file = input.files[0];
     if (!file) return;
-    
     const reader = new FileReader();
     reader.onload = async (e) => {
         try {
             const items = JSON.parse(e.target.result);
             if (Array.isArray(items)) {
                 for (const item of items) {
-                    if (item.id) {
-                        await FirebaseAPI.update(item.id, item);
-                    } else {
-                        await FirebaseAPI.add(item);
-                    }
+                    if (item.id) { await FirebaseAPI.update(item.id, item); }
+                    else { await FirebaseAPI.add(item); }
                 }
                 await loadInventory();
                 renderInventory();
                 showNotification('Dados importados!');
             }
-        } catch (err) {
-            alert('Erro ao importar arquivo!');
-        }
+        } catch (err) { alert('Erro ao importar arquivo!'); }
     };
     reader.readAsText(file);
     input.value = '';
