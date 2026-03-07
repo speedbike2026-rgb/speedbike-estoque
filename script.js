@@ -14,13 +14,6 @@ async function loadInventory() {
     const items = await FirebaseAPI.getAll();
     if (items && items.length > 0) {
         inventory = items;
-    } else {
-        inventory = [
-            { id: 'demo1', code: 'BIK001', name: 'Pneu 26x2.0', category: 'Pneus', price: 89.90, quantity: 25, minStock: 10 },
-            { id: 'demo2', code: 'BIK002', name: 'Câmbio Shimano', category: 'Cambios', price: 189.90, quantity: 8, minStock: 5 },
-            { id: 'demo3', code: 'BIK003', name: 'Freio a Disco', category: 'Freios', price: 249.90, quantity: 3, minStock: 5 },
-            { id: 'demo4', code: 'BIK004', name: 'Guidão Alumínio', category: 'Guidões', price: 129.90, quantity: 12, minStock: 5 }
-        ];
     }
 }
 
@@ -125,4 +118,46 @@ function showNotification(message) {
     document.getElementById('notificationMessage').textContent = message;
     n.classList.add('show');
     setTimeout(() => n.classList.remove('show'), 3000);
+}
+
+// Exportar dados
+function exportData() {
+    const dataStr = JSON.stringify(inventory, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'speedbike_estoque_' + new Date().toISOString().split('T')[0] + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    showNotification('Dados exportados!');
+}
+
+// Importar dados
+async function importData(input) {
+    const file = input.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        try {
+            const items = JSON.parse(e.target.result);
+            if (Array.isArray(items)) {
+                for (const item of items) {
+                    if (item.id) {
+                        await FirebaseAPI.update(item.id, item);
+                    } else {
+                        await FirebaseAPI.add(item);
+                    }
+                }
+                await loadInventory();
+                renderInventory();
+                showNotification('Dados importados!');
+            }
+        } catch (err) {
+            alert('Erro ao importar arquivo!');
+        }
+    };
+    reader.readAsText(file);
+    input.value = '';
 }
