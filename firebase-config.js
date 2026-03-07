@@ -1,8 +1,4 @@
-// ============================================
 // CONFIGURAÇÃO DO FIREBASE - SPEEDBIKE
-// ============================================
-
-// Suas credenciais do Firebase (já configuradas!)
 const firebaseConfig = {
     apiKey: "AIzaSyAheIlCfptWY5Nak49QyUBgBOQCN774omA",
     authDomain: "speedbike-estoque.firebaseapp.com",
@@ -13,109 +9,90 @@ const firebaseConfig = {
     measurementId: "G-3D3G7QFTV1"
 };
 
-// ============================================
-// CÓDIGO DO APLICATIVO
-// ============================================
-
 let db;
 let inventoryCollection;
 
-// Inicializar Firebase
+// Versões compatíveis com CDN
+const FIREBASE_VERSION = "9.22.0";
+
 function initFirebase() {
     return new Promise((resolve, reject) => {
-        // Carregar SDK do Firebase (versão 12)
-        const script = document.createElement('script');
-        script.src = 'https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js';
-        script.onload = () => {
+        // Carregar Firebase App
+        const appScript = document.createElement('script');
+        appScript.src = `https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-app.js`;
+        appScript.onload = () => {
+            // Carregar Firestore
             const firestoreScript = document.createElement('script');
-            firestoreScript.src = 'https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js';
+            firestoreScript.src = `https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-firestore.js`;
             firestoreScript.onload = () => {
-                // Inicializar Firebase
                 firebase.initializeApp(firebaseConfig);
                 db = firebase.firestore();
                 inventoryCollection = db.collection('inventory');
-                console.log("Firebase conectado com sucesso!");
+                console.log("Firebase conectado!");
                 resolve(true);
             };
+            firestoreScript.onerror = () => reject("Erro ao carregar Firestore");
             document.head.appendChild(firestoreScript);
         };
-        document.head.appendChild(script);
+        appScript.onerror = () => reject("Erro ao carregar Firebase");
+        document.head.appendChild(appScript);
     });
 }
 
-// Funções do Firebase
 const FirebaseAPI = {
-    // Carregar todos os itens
     getAll: async () => {
         if (!db) return null;
-        
         try {
             const snapshot = await inventoryCollection.get();
             const items = [];
-            snapshot.forEach(doc => {
-                items.push({ id: doc.id, ...doc.data() });
-            });
+            snapshot.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
             return items;
         } catch (error) {
-            console.error("Erro ao carregar itens:", error);
+            console.error("Erro:", error);
             return null;
         }
     },
-
-    // Adicionar novo item
     add: async (item) => {
         if (!db) return false;
-        
         try {
             const docRef = await inventoryCollection.add(item);
             return docRef.id;
         } catch (error) {
-            console.error("Erro ao adicionar item:", error);
+            console.error("Erro:", error);
             return false;
         }
     },
-
-    // Atualizar item
     update: async (id, item) => {
         if (!db) return false;
-        
         try {
             await inventoryCollection.doc(id).update(item);
             return true;
         } catch (error) {
-            console.error("Erro ao atualizar item:", error);
+            console.error("Erro:", error);
             return false;
         }
     },
-
-    // Excluir item
     delete: async (id) => {
         if (!db) return false;
-        
         try {
             await inventoryCollection.doc(id).delete();
             return true;
         } catch (error) {
-            console.error("Erro ao excluir item:", error);
+            console.error("Erro:", error);
             return false;
         }
     },
-
-    // Atualizar quantidade
     updateQuantity: async (id, quantity) => {
         if (!db) return false;
-        
         try {
             await inventoryCollection.doc(id).update({ quantity: quantity });
             return true;
         } catch (error) {
-            console.error("Erro ao atualizar quantidade:", error);
+            console.error("Erro:", error);
             return false;
         }
     }
 };
 
-// Exportar para uso global
 window.FirebaseAPI = FirebaseAPI;
 window.initFirebase = initFirebase;
-
