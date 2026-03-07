@@ -1,13 +1,11 @@
 // SPEEDBIKE - Sistema de Estoque com Firebase
 let inventory = [];
 let currentEditId = null;
-let currentQuantityId = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
     await initFirebase();
     await loadInventory();
     renderInventory();
-    setupEventListeners();
 });
 
 async function loadInventory() {
@@ -15,13 +13,6 @@ async function loadInventory() {
     if (items && items.length > 0) {
         inventory = items;
     }
-}
-
-function setupEventListeners() {
-    document.getElementById('searchInput').addEventListener('input', (e) => renderInventory(e.target.value));
-    document.getElementById('itemModal').addEventListener('click', (e) => { if (e.target.id === 'itemModal') closeModal(); });
-    document.getElementById('quantityModal').addEventListener('click', (e) => { if (e.target.id === 'quantityModal') closeQuantityModal(); });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeModal(); closeQuantityModal(); } });
 }
 
 function renderInventory(searchTerm = '') {
@@ -41,12 +32,9 @@ function renderInventory(searchTerm = '') {
                 <td><span class="item-name">${item.name}</span></td>
                 <td><span class="item-category">${item.category}</span></td>
                 <td><span class="item-price">R$ ${item.price.toFixed(2).replace('.', ',')}</span></td>
-                <td><span class="qty-badge ${qtyClass}">${item.quantity}</span></td>
+                <td><span class="qty-badge ${qtyClass}" onclick="editItem('${item.id}')" style="cursor:pointer" title="Clique para editar">${item.quantity}</span></td>
                 <td>
                     <div class="action-buttons">
-                        <button class="action-btn update" onclick="openQuantity('${item.id}')" title="Editar Quantidade">
-                            <i class="fa-solid fa-pen-to-square"></i>
-                        </button>
                         <button class="action-btn edit" onclick="editItem('${item.id}')" title="Editar">
                             <i class="fa-solid fa-pen"></i>
                         </button>
@@ -99,16 +87,6 @@ function editItem(id) {
     document.getElementById('itemModal').classList.add('active');
 }
 
-function openQuantity(id) {
-    const item = inventory.find(i => i.id === id);
-    if (!item) return;
-    currentQuantityId = id;
-    document.getElementById('quantityItemName').textContent = item.name;
-    document.getElementById('currentQuantity').textContent = item.quantity;
-    document.getElementById('newQuantity').value = item.quantity;
-    document.getElementById('quantityModal').classList.add('active');
-}
-
 async function deleteItem(id) {
     if (confirm('Excluir este item?')) {
         await FirebaseAPI.delete(id);
@@ -116,20 +94,6 @@ async function deleteItem(id) {
         renderInventory(document.getElementById('searchInput').value);
         showNotification('Item excluído!');
     }
-}
-
-function closeQuantityModal() { document.getElementById('quantityModal').classList.remove('active'); }
-function adjustQuantity(amount) { const input = document.getElementById('newQuantity'); input.value = Math.max(0, parseInt(input.value) + amount); }
-
-async function updateQuantity(e) {
-    e.preventDefault();
-    const newQty = parseInt(document.getElementById('newQuantity').value);
-    await FirebaseAPI.updateQuantity(currentQuantityId, newQty);
-    const idx = inventory.findIndex(i => i.id === currentQuantityId);
-    if (idx !== -1) inventory[idx].quantity = newQty;
-    renderInventory(document.getElementById('searchInput').value);
-    closeQuantityModal();
-    showNotification('Quantidade atualizada!');
 }
 
 function showNotification(message) {
@@ -172,3 +136,7 @@ async function importData(input) {
     reader.readAsText(file);
     input.value = '';
 }
+
+document.getElementById('searchInput').addEventListener('input', (e) => renderInventory(e.target.value));
+document.getElementById('itemModal').addEventListener('click', (e) => { if (e.target.id === 'itemModal') closeModal(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });

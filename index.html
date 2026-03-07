@@ -133,37 +133,6 @@
             </form>
         </div>
 
-    <div class="modal" id="quantityModal">
-        <div class="modal-content modal-small">
-            <div class="modal-header">
-                <h2>Atualizar Quantidade</h2>
-                <button class="close-btn" onclick="closeQuantityModal()">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <form onsubmit="updateQuantity(event)">
-                <div class="quantity-display">
-                    <h3 id="quantityItemName">Nome do Item</h3>
-                    <p class="current-quantity">Quantidade atual: <span id="currentQuantity">0</span></p>
-                </div>
-                <div class="quantity-actions">
-                    <button type="button" class="qty-btn" onclick="adjustQuantity(-1)">
-                        <i class="fa-solid fa-minus"></i>
-                    </button>
-                    <input type="number" id="newQuantity" required min="0" value="0" class="qty-input">
-                    <button type="button" class="qty-btn" onclick="adjustQuantity(1)">
-                        <i class="fa-solid fa-plus"></i>
-                    </button>
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeQuantityModal()">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fa-solid fa-check"></i> Atualizar
-                    </button>
-                </div>
-            </form>
-        </div>
-
     <div class="notification" id="notification">
         <i class="fa-solid fa-circle-check"></i>
         <span id="notificationMessage">Mensagem</span>
